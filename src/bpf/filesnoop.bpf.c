@@ -28,7 +28,7 @@ struct {
 //
 // print fmt: "filename: 0x%08lx, flags: 0x%08lx, mode: 0x%08lx", ((unsigned long)(REC->filename)), ((unsigned long)(REC->flags)), ((unsigned long)(REC->mode))
 
-SEC("tp/syscalls/sys_enter_open")
+SEC("tp/syscalls/sys_enter_openat")
 int handle_open_enter(struct trace_event_raw_sys_enter *ctx)
 {
     /* reserve sample from BPF ringbuf */
@@ -44,7 +44,7 @@ int handle_open_enter(struct trace_event_raw_sys_enter *ctx)
 
     event->pid = pid;
     event->ppid = BPF_CORE_READ(task, real_parent, tgid);
-    bpf_probe_read_str(&event->filename, sizeof(event->filename), (void*)ctx->args[0]);
+    bpf_probe_read_str(&event->filename, sizeof(event->filename), (void*)ctx->args[1]);
 
     /* send data to user-space for post-processing */
     bpf_ringbuf_submit(event, 0);
